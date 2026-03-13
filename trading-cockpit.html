@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeDesk Pro · Trade Republic</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#080c10;--surface:#0d1117;--card:#111820;--border:#1e2d3d;
+  --green:#00ff9d;--red:#ff3b5c;--yellow:#f5c400;--blue:#4da8ff;
+  --cyan:#00e5ff;--orange:#ff7043;--purple:#c084fc;
+  --text:#cdd6f4;--muted:#546e7a;
+  --glow-green:0 0 18px rgba(0,255,157,0.3);
+  --glow-red:0 0 18px rgba(255,59,92,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:13px;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.02)1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.02)1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.w{position:relative;z-index:1;padding:14px;max-width:1640px;margin:0 auto}
+
+/* NAV TABS */
+.tabs{display:flex;gap:4px;margin-bottom:12px;background:var(--surface);padding:4px;border-radius:8px;border:1px solid var(--border)}
+.tab{padding:8px 18px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);transition:all 0.2s;border:none;background:transparent}
+.tab.active{background:var(--card);color:var(--cyan);border:1px solid rgba(0,229,255,0.2)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:10px}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;color:#fff}.logo span{color:var(--cyan)}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:1px}
+.tr-pill{background:rgba(255,112,67,0.1);border:1px solid rgba(255,112,67,0.35);padding:6px 14px;border-radius:20px;font-size:11px;color:var(--orange);text-align:center}
+.tr-pill strong{color:#fff}
+.header-r{display:flex;align-items:center;gap:14px}
+.clock{font-size:19px;font-weight:700;letter-spacing:2px}
+.mkt-status{display:flex;align-items:center;gap:6px;font-size:11px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:var(--glow-green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* TICKER */
+.ticker-wrap{overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 0;margin-bottom:10px}
+.ticker-inner{display:flex;gap:44px;animation:scroll 40s linear infinite;white-space:nowrap}
+.ticker-inner:hover{animation-play-state:paused}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{display:inline-flex;gap:7px;align-items:center;cursor:pointer;padding:0 4px;border-radius:4px;transition:background 0.15s}
+.ti:hover{background:rgba(0,229,255,0.05)}
+.ts{color:var(--cyan);font-weight:700;font-size:11px}
+.tp{font-size:11px}
+.up{color:var(--green)}.down{color:var(--red)}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+
+/* FEE BANNER */
+.fee-banner{background:linear-gradient(90deg,rgba(255,112,67,0.09),rgba(255,112,67,0.03));border:1px solid rgba(255,112,67,0.3);border-radius:8px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11px}
+.fee-banner-text{flex:1;line-height:1.7}.fee-banner-text strong{color:var(--orange)}
+.fee-stat{text-align:center;padding:0 14px;border-left:1px solid rgba(255,112,67,0.2)}
+.fsv{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--orange)}
+.fsl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* GRIDS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.g2l{display:grid;grid-template-columns:1fr 340px;gap:10px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.25}
+.card.orange-top::before{background:linear-gradient(90deg,transparent,var(--orange),transparent);opacity:0.5}
+.card.green-top::before{background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0.4}
+.card.purple-top::before{background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0.4}
+.ct{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sv{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.sv.pos{color:var(--green);text-shadow:var(--glow-green)}
+.sv.neg{color:var(--red);text-shadow:var(--glow-red)}
+.sv.neu{color:var(--blue)}.sv.warn{color:var(--orange)}
+.ss{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5}
+.sfn{font-size:10px;color:var(--orange);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,112,67,0.2)}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:5px 7px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:8px 7px;border-bottom:1px solid rgba(30,45,61,0.4);font-size:11px;vertical-align:middle}
+tr:hover td{background:rgba(77,168,255,0.03)}
+.sym{display:inline-block;background:rgba(0,229,255,0.08);color:var(--cyan);border:1px solid rgba(0,229,255,0.2);padding:2px 7px;border-radius:4px;font-weight:700;font-size:10px}
+.pc.pos{color:var(--green)}.pc.neg{color:var(--red)}
+.fc{color:var(--orange);font-size:10px}
+.abt{background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.3);color:var(--red);padding:3px 9px;border-radius:4px;cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;transition:all 0.2s}
+.abt:hover{background:rgba(255,59,92,0.2)}
+.ab2{background:rgba(0,255,157,0.1);border:1px solid rgba(0,255,157,0.3);color:var(--green);}
+.ab2:hover{background:rgba(0,255,157,0.2)}
+.abadge{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700}
+.al{background:rgba(0,255,157,0.1);color:var(--green);border:1px solid rgba(0,255,157,0.2)}
+.am{background:rgba(245,196,0,0.1);color:var(--yellow);border:1px solid rgba(245,196,0,0.2)}
+.ah{background:rgba(255,59,92,0.1);color:var(--red);border:1px solid rgba(255,59,92,0.2);animation:flash 1s infinite}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:0.5}}
+.beb{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px;border:1px solid}
+.beb.ok{color:var(--green);border-color:rgba(0,255,157,0.3);background:rgba(0,255,157,0.05)}
+.beb.no{color:var(--red);border-color:rgba(255,59,92,0.3);background:rgba(255,59,92,0.05)}
+
+/* FORMS */
+.fl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;display:block}
+.fi{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:5px;font-family:'Space Mono',monospace;font-size:12px;outline:none}
+.fi:focus{border-color:var(--cyan)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bg{display:flex;gap:7px}
+.bbc{flex:1;padding:9px;border:none;border-radius:6px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s}
+.bb{background:var(--green);color:var(--bg)}.bs{background:var(--red);color:#fff}
+.bb:hover{box-shadow:var(--glow-green)}.bs:hover{box-shadow:var(--glow-red)}
+
+/* CALC RESULT */
+.cr{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px}
+.crow{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
+.cdiv{border-top:1px solid var(--border);margin:5px 0}
+.good{color:var(--green)}.bad{color:var(--red)}.info{color:var(--cyan)}.warn-c{color:var(--orange)}
+
+/* SCANNER / SIGNAL CARDS */
+.signal-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:12px;position:relative;transition:all 0.2s;cursor:pointer}
+.signal-card:hover{border-color:rgba(0,229,255,0.3);background:rgba(13,17,23,0.8)}
+.signal-card.buy-signal{border-left:3px solid var(--green)}
+.signal-card.sell-signal{border-left:3px solid var(--red)}
+.signal-card.watch-signal{border-left:3px solid var(--yellow)}
+.sc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.sc-sym{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:#fff}
+.sc-name{font-size:10px;color:var(--muted);margin-top:1px}
+.sc-badge{padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700}
+.buy-badge{background:rgba(0,255,157,0.15);color:var(--green);border:1px solid rgba(0,255,157,0.3)}
+.sell-badge{background:rgba(255,59,92,0.15);color:var(--red);border:1px solid rgba(255,59,92,0.3)}
+.watch-badge{background:rgba(245,196,0,0.15);color:var(--yellow);border:1px solid rgba(245,196,0,0.2)}
+.sc-price{font-size:18px;font-weight:700;margin:4px 0}
+.sc-reason{font-size:10px;color:var(--text);line-height:1.5;margin-top:5px}
+.sc-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.sc-lvl{background:var(--card);border-radius:5px;padding:5px 7px;text-align:center}
+.sc-lvl-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.sc-lvl-v{font-size:11px;font-weight:700;margin-top:1px}
+.sc-fee{font-size:10px;color:var(--orange);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,112,67,0.15)}
+.sc-add-btn{width:100%;margin-top:8px;padding:7px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);color:var(--cyan);border-radius:5px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;transition:all 0.2s}
+.sc-add-btn:hover{background:rgba(0,229,255,0.15)}
+.sc-rr{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;margin-top:4px}
+.rr-good{background:rgba(0,255,157,0.1);color:var(--green);border:1px solid rgba(0,255,157,0.2)}
+.rr-ok{background:rgba(245,196,0,0.1);color:var(--yellow);border:1px solid rgba(245,196,0,0.2)}
+.rr-bad{background:rgba(255,59,92,0.1);color:var(--red);border:1px solid rgba(255,59,92,0.2)}
+.scanner-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+/* AI PANEL */
+.ai-tip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:11px;line-height:1.65;position:relative;margin-bottom:8px}
+.ai-tip::before{content:attr(data-type);position:absolute;top:-1px;right:8px;background:var(--card);padding:0 5px;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+.ai-tip.buy::before{color:var(--green)}.ai-tip.sell::before{color:var(--red)}
+.ai-tip.warn::before{color:var(--yellow)}.ai-tip.fee::before{color:var(--orange)}
+.ask-ai{display:flex;gap:7px;margin-top:6px}
+.ask-ai input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 11px;border-radius:5px;font-family:'Space Mono',monospace;font-size:11px;outline:none}
+.ask-ai input:focus{border-color:var(--cyan)}
+.ask-ai button{background:var(--cyan);color:var(--bg);border:none;padding:7px 13px;border-radius:5px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:11px}
+.ask-ai button:hover{opacity:0.85}
+.ai-resp{background:var(--surface);border:1px solid rgba(0,229,255,0.3);border-radius:6px;padding:11px;font-size:11px;line-height:1.7;display:none;margin-top:8px}
+.ai-resp.show{display:block;animation:fi 0.35s ease}
+
+/* WATCHLIST */
+.wl-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,45,61,0.4)}
+.wl-left .wl-sym{color:var(--cyan);font-weight:700;font-size:12px}
+.wl-left .wl-name{font-size:10px;color:var(--muted)}
+.wl-left .wl-be{font-size:10px;color:var(--orange);margin-top:2px}
+.wl-right{text-align:right}
+.wl-price{font-size:13px}
+.wl-loading{color:var(--muted);font-size:11px;font-style:italic}
+
+/* HISTORY */
+.hist-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(30,45,61,0.35);font-size:11px}
+
+/* RISK BAR */
+.rbw{height:5px;background:var(--surface);border-radius:3px;overflow:hidden;margin-top:5px}
+.rbf{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--yellow) 50%,var(--red));transition:width 1s}
+
+/* MISC */
+.ld{display:inline-block;width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.refresh-btn{background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);color:var(--cyan);padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;transition:all 0.2s}
+.refresh-btn:hover{background:rgba(0,229,255,0.15)}
+.refresh-btn.spinning svg{animation:spin 1s linear infinite}
+.last-update{font-size:10px;color:var(--muted);margin-left:8px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border)}
+</style>
+</head>
+<body>
+<div class="w">
+
+<!-- HEADER -->
+<header>
+  <div>
+    <div class="logo">Trade<span>Desk</span> Pro</div>
+    <div class="logo-sub">Trade Republic Edition · Live Kurse</div>
+  </div>
+  <div class="tr-pill">
+    Ordergebühr: <strong>€1,00</strong> &nbsp;·&nbsp; Roundtrip: <strong style="color:var(--orange)">€2,00</strong><br>
+    <span style="font-size:10px;color:var(--muted)">Budget pro Trade: €200–500</span>
+  </div>
+  <div class="header-r">
+    <div>
+      <div class="clock" id="clock">--:--:--</div>
+      <div style="font-size:9px;color:var(--muted);text-align:center">XETRA · Frankfurt · MEZ</div>
+    </div>
+    <div class="mkt-status">
+      <div class="dot" id="mkt-dot"></div>
+      <span id="mkt-lbl" style="font-size:11px;color:var(--green)">OFFEN</span>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('cockpit')">📊 Cockpit</button>
+  <button class="tab" onclick="showTab('scanner')">🔍 Trade Scanner</button>
+  <button class="tab" onclick="showTab('calc')">🧮 Kalkulator</button>
+  <button class="tab" onclick="showTab('history')">📜 Verlauf</button>
+  <div style="flex:1"></div>
+  <button class="refresh-btn" id="refresh-btn" onclick="refreshAllPrices()">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+    Kurse aktualisieren
+  </button>
+  <span class="last-update" id="last-update">–</span>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap"><div class="ticker-inner" id="ticker">
+  <span style="color:var(--muted);font-size:11px;padding:0 20px"><span class="ld"></span> Lade Live-Kurse von Yahoo Finance...</span>
+</div></div>
+
+<!-- FEE BANNER -->
+<div class="fee-banner">
+  <div style="font-size:18px">⚠️</div>
+  <div class="fee-banner-text">
+    <strong>Trade Republic · €1 pro Order · €2 pro Roundtrip.</strong>
+    Bei €200 Position: Breakeven bei +1,0% · Bei €500 Position: Breakeven bei +0,4%.
+    <strong>Faustregel:</strong> Nur Trades mit mind. <strong>R/R ≥ 1:2</strong> eingehen — sonst frisst die Gebühr den Gewinn.
+  </div>
+  <div class="fee-stat"><div class="fsv" id="f-fees">€0</div><div class="fsl">Gebühren heute</div></div>
+  <div class="fee-stat"><div class="fsv" id="f-orders">0</div><div class="fsl">Orders</div></div>
+  <div class="fee-stat"><div class="fsv" id="f-pnl" style="color:var(--green)">+€0</div><div class="fsl">P&L netto</div></div>
+</div>
+
+<!-- ===== COCKPIT TAB ===== -->
+<div id="tab-cockpit" class="tab-panel active">
+
+  <!-- STATS -->
+  <div class="g4">
+    <div class="card green-top">
+      <div class="ct">📈 P&L Heute (netto)</div>
+      <div class="sv pos" id="pnl-day">+€ 0,00</div>
+      <div class="ss" id="pnl-sub">0 Trades</div>
+      <div class="sfn">⚡ Nach TR-Gebühren</div>
+    </div>
+    <div class="card orange-top">
+      <div class="ct">💼 Unrealisiert</div>
+      <div class="sv warn" id="open-pnl">+€ 0,00</div>
+      <div class="ss">Offene Positionen</div>
+      <div class="sfn" id="open-pnl-net">⚡ Netto bei Schließung: +€0,00</div>
+    </div>
+    <div class="card">
+      <div class="ct">💰 Depot-Kapital</div>
+      <div class="sv neu" id="kapital-val">€ 0,00</div>
+      <div class="ss">Verfügbar für neue Trades</div>
+      <div style="margin-top:7px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px"><span>Risiko</span><span id="risk-pct">0%</span></div>
+        <div class="rbw"><div class="rbf" id="risk-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="card orange-top">
+      <div class="ct">🧾 TR-Gebühren</div>
+      <div class="sv warn" id="fees-total">€ 0,00</div>
+      <div class="ss" id="fees-sub">0 Orders · 0 Roundtrips</div>
+      <div class="sfn" id="fees-verdict">⚡ 0% des P&L</div>
+    </div>
+  </div>
+
+  <!-- SETUP PROMPT (shown when no positions) -->
+  <div id="setup-prompt" class="card" style="text-align:center;padding:30px;margin-bottom:10px">
+    <div style="font-size:28px;margin-bottom:10px">🚀</div>
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px">Depot einrichten</div>
+    <div style="color:var(--muted);font-size:12px;margin-bottom:16px;line-height:1.7">
+      Trage dein verfügbares Kapital ein und füge deine ersten Positionen hinzu.<br>
+      Oder schau im <strong style="color:var(--cyan)">Trade Scanner</strong> nach aktuellen Setups.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+        <label class="fl">Dein Kapital (€)</label>
+        <input class="fi" id="depot-input" type="number" placeholder="z.B. 5000" style="width:200px">
+      </div>
+      <button class="bbc bb" style="margin-top:18px;padding:9px 20px;width:auto" onclick="setDepot()">Kapital speichern</button>
+      <button class="bbc" style="margin-top:18px;padding:9px 20px;width:auto;background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.3)" onclick="showTab('scanner')">Zum Trade Scanner →</button>
+    </div>
+  </div>
+
+  <div id="main-cockpit" style="display:none">
+    <div class="g2l">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <!-- POSITIONS -->
+        <div class="card">
+          <div class="ct" style="display:flex;align-items:center;justify-content:space-between">
+            <span>📊 Offene Positionen</span>
+            <button class="refresh-btn" onclick="showTab('calc')" style="font-size:9px;padding:3px 8px">+ Neue Position</button>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Symbol</th><th>Dir.</th><th>Stk.</th><th>Einstieg</th><th>Aktuell</th>
+              <th>Gebühr</th><th>Brutto</th><th>Netto ★</th><th>Breakeven</th>
+              <th>Stop Loss</th><th>Status</th><th>Aktion</th>
+            </tr></thead>
+            <tbody id="pos-body"></tbody>
+          </table>
+        </div>
+
+        <!-- WATCHLIST -->
+        <div class="card">
+          <div class="ct">👁 Watchlist · Live-Kurse (Yahoo Finance)</div>
+          <div id="watchlist-body"></div>
+        </div>
+      </div>
+
+      <!-- AI PANEL -->
+      <div class="card purple-top">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+          <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--blue));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px">🤖</div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px">KI-Assistent</div>
+            <div style="font-size:9px;color:var(--muted)">Trade Republic optimiert · €2/Roundtrip</div>
+          </div>
+        </div>
+        <div id="ai-tips"></div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:6px 0 4px">Frag den Assistenten</div>
+        <div class="ask-ai">
+          <input type="text" id="ai-q" placeholder="z.B. SAP kaufen bei €185?" onkeydown="if(event.key==='Enter')askAI()">
+          <button onclick="askAI()">→</button>
+        </div>
+        <div id="ai-resp" class="ai-resp"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /cockpit tab -->
+
+<!-- ===== SCANNER TAB ===== -->
+<div id="tab-scanner" class="tab-panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800">🔍 Trade Scanner</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">KI-generierte Setups · optimiert für €200–500 · Trade Republic €1-Gebühr</div>
+    </div>
+    <button class="refresh-btn" onclick="runScanner()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      Scanner starten
+    </button>
+  </div>
+  <div id="scanner-output">
+    <div style="text-align:center;padding:40px;color:var(--muted)">
+      <div style="font-size:28px;margin-bottom:10px">🔍</div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;margin-bottom:8px">Scanner bereit</div>
+      <div style="font-size:11px">Klick auf "Scanner starten" für KI-generierte Trade-Setups</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CALCULATOR TAB ===== -->
+<div id="tab-calc" class="tab-panel">
+  <div class="g2">
+    <div class="card">
+      <div class="ct">🧮 Trade-Kalkulator · TR €1-Gebühr</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div><label class="fl">Symbol</label><input class="fi" id="c-sym" value="SAP.DE" oninput="fetchCalcPrice()"></div>
+        <div id="c-live-price" style="font-size:11px;color:var(--cyan);min-height:16px"></div>
+        <div class="fr2">
+          <div><label class="fl">Kaufkurs €</label><input class="fi" id="c-buy" type="number" value="185.00" oninput="calcTrade()"></div>
+          <div><label class="fl">Stückzahl</label><input class="fi" id="c-qty" type="number" value="10" oninput="calcTrade()"></div>
+        </div>
+        <div class="fr2">
+          <div><label class="fl">Zielkurs €</label><input class="fi" id="c-target" type="number" value="187.50" oninput="calcTrade()"></div>
+          <div><label class="fl">Stop Loss €</label><input class="fi" id="c-stop" type="number" value="183.00" oninput="calcTrade()"></div>
+        </div>
+        <div class="fr2">
+          <div>
+            <label class="fl">Richtung</label>
+            <select class="fi" id="c-dir" onchange="calcTrade()">
+              <option value="LONG">LONG (Kaufen)</option>
+              <option value="SHORT">SHORT (Leerverkauf)</option>
+            </select>
+          </div>
+          <div><label class="fl">Positionstyp</label>
+            <select class="fi" id="c-type">
+              <option>Aktie</option><option>ETF</option><option>Krypto</option>
+            </select>
+          </div>
+        </div>
+        <div class="bg">
+          <button class="bbc bb" onclick="addPositionFromCalc('BUY')">▲ LONG öffnen</button>
+          <button class="bbc bs" onclick="addPositionFromCalc('SELL')">▼ SHORT öffnen</button>
+        </div>
+        <div id="c-feedback" style="font-size:11px;color:var(--muted);text-align:center;min-height:14px"></div>
+      </div>
+    </div>
+    <div class="card cr" id="calc-result-panel">
+      <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Live Kalkulation</div>
+      <div class="crow"><span style="color:var(--muted)">Positionsgröße</span><span id="r-size">-</span></div>
+      <div class="crow"><span style="color:var(--orange)">TR Kaufgebühr</span><span style="color:var(--orange)">− €1,00</span></div>
+      <div class="crow"><span style="color:var(--orange)">TR Verkaufsgebühr</span><span style="color:var(--orange)">− €1,00</span></div>
+      <div class="cdiv"></div>
+      <div class="crow"><span style="color:var(--muted)">Breakeven-Kurs</span><span class="info" id="r-be" style="font-weight:700">-</span></div>
+      <div class="crow"><span style="color:var(--muted)">Breakeven-Move</span><span id="r-be-pct" style="color:var(--orange)">-</span></div>
+      <div class="cdiv"></div>
+      <div class="crow"><span style="color:var(--muted)">Ziel P&L (netto)</span><span id="r-tpnl" style="font-weight:700">-</span></div>
+      <div class="crow"><span style="color:var(--muted)">Stop P&L (netto)</span><span id="r-spnl" style="font-weight:700">-</span></div>
+      <div class="crow"><span style="color:var(--muted)">Risk / Reward</span><span id="r-rr" style="font-weight:700">-</span></div>
+      <div class="crow"><span style="color:var(--muted)">Gebühr % vom Einsatz</span><span id="r-fpct" style="color:var(--orange)">-</span></div>
+      <div class="crow"><span style="color:var(--muted)">Empf. Positionsgröße?</span><span id="r-size-ok">-</span></div>
+      <div class="cdiv"></div>
+      <div id="r-verdict" style="padding:8px;border-radius:5px;font-size:11px;text-align:center;font-weight:700"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY TAB ===== -->
+<div id="tab-history" class="tab-panel">
+  <div class="card">
+    <div class="ct">📜 Trade-Verlauf</div>
+    <table>
+      <thead><tr>
+        <th>Zeit</th><th>Symbol</th><th>Richtung</th><th>Stk.</th>
+        <th>Einstieg</th><th>Ausstieg</th><th>Brutto P&L</th>
+        <th>TR-Gebühr</th><th>Netto P&L</th>
+      </tr></thead>
+      <tbody id="hist-body"></tbody>
+    </table>
+    <div id="hist-summary" style="padding:10px 0;font-size:11px;display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:6px">
+      <span style="color:var(--muted)">Noch keine geschlossenen Trades.</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<script>
+const FEE = 1.00;
+const BUDGET_MIN = 200, BUDGET_MAX = 500;
+
+// ===== STATE =====
+let state = {
+  depot: 0,
+  positions: [],
+  history: [],
+  prices: {},
+  lastUpdate: null
+};
+
+// ===== WATCHLIST SYMBOLS =====
+const WATCHLIST = [
+  // DAX
+  {sym:'SAP.DE',   name:'SAP SE',          cat:'DAX'},
+  {sym:'SIE.DE',   name:'Siemens AG',      cat:'DAX'},
+  {sym:'ALV.DE',   name:'Allianz SE',      cat:'DAX'},
+  {sym:'BMW.DE',   name:'BMW AG',          cat:'DAX'},
+  {sym:'BAYN.DE',  name:'Bayer AG',        cat:'DAX'},
+  {sym:'DTE.DE',   name:'Deutsche Telekom',cat:'DAX'},
+  // US Tech
+  {sym:'NVDA',     name:'NVIDIA Corp',     cat:'US-Tech'},
+  {sym:'AAPL',     name:'Apple Inc',       cat:'US-Tech'},
+  {sym:'MSFT',     name:'Microsoft',       cat:'US-Tech'},
+  {sym:'AMZN',     name:'Amazon',          cat:'US-Tech'},
+  {sym:'META',     name:'Meta Platforms',  cat:'US-Tech'},
+  {sym:'TSLA',     name:'Tesla Inc',       cat:'US-Tech'},
+  // ETFs
+  {sym:'EXS1.DE',  name:'DAX ETF (iShares)',cat:'ETF'},
+  {sym:'EXXT.DE',  name:'NASDAQ-100 ETF',  cat:'ETF'},
+  {sym:'EUNL.DE',  name:'MSCI World ETF',  cat:'ETF'},
+];
+
+function save() {
+  
+  
+  
+}
+
+// ===== YAHOO FINANCE PROXY =====
+// Uses a public CORS proxy to fetch Yahoo Finance data
+async function fetchPrice(symbol) {
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
+    const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+    const res = await fetch(proxy);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    if (!result) return null;
+    const meta = result.meta;
+    const price = meta.regularMarketPrice || meta.previousClose;
+    const prev = meta.chartPreviousClose || meta.previousClose;
+    const change = prev ? ((price - prev) / prev * 100) : 0;
+    return { price: parseFloat(price.toFixed(4)), change: parseFloat(change.toFixed(2)), prev };
+  } catch(e) {
+    return null;
+  }
+}
+
+async function refreshAllPrices() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+
+  const syms = WATCHLIST.map(w => w.sym);
+  state.positions.forEach(p => { if (!syms.includes(p.sym)) syms.push(p.sym); });
+
+  // Fetch in parallel (batches of 5)
+  const results = {};
+  for (let i = 0; i < syms.length; i += 5) {
+    const batch = syms.slice(i, i+5);
+    const fetched = await Promise.all(batch.map(s => fetchPrice(s).then(r => [s, r])));
+    fetched.forEach(([s, r]) => { if (r) results[s] = r; });
+  }
+  state.prices = results;
+  state.lastUpdate = new Date();
+  document.getElementById('last-update').textContent = 'Aktualisiert: ' + state.lastUpdate.toLocaleTimeString('de-DE');
+
+  renderTicker();
+  renderWatchlist();
+  renderPositions();
+
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+}
+
+// ===== CLOCK =====
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    [now.getHours(),now.getMinutes(),now.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+  const h=now.getHours(),m=now.getMinutes();
+  // XETRA: Mon-Fri 09:00–17:30
+  const day = now.getDay();
+  const open = day>=1&&day<=5&&(h>9||(h===9&&m>=0))&&(h<17||(h===17&&m<30));
+  document.getElementById('mkt-dot').style.background = open?'var(--green)':'var(--red)';
+  document.getElementById('mkt-lbl').textContent = open?'XETRA OFFEN':'GESCHLOSSEN';
+  document.getElementById('mkt-lbl').style.color = open?'var(--green)':'var(--muted)';
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ===== TICKER =====
+function renderTicker() {
+  const items = WATCHLIST.slice(0, 12);
+  let html = '';
+  for (let i=0;i<2;i++) {
+    items.forEach(w => {
+      const d = state.prices[w.sym];
+      const p = d ? d.price.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+      const c = d ? d.change : 0;
+      const cl = c>=0?'up':'down', sign=c>=0?'+':'';
+      html += `<span class="ti" onclick="prefillCalc('${w.sym}',${d?d.price:0})">
+        <span class="live-dot"></span>
+        <span class="ts">${w.sym}</span>
+        <span class="tp">${p}</span>
+        <span class="${cl}">${sign}${c.toFixed(2)}%</span>
+      </span>`;
+    });
+  }
+  document.getElementById('ticker').innerHTML = html || '<span style="color:var(--muted);font-size:11px;padding:0 20px">Kurse nicht verfügbar – Netzwerk prüfen</span>';
+}
+
+// ===== WATCHLIST =====
+function renderWatchlist() {
+  const grouped = {};
+  WATCHLIST.forEach(w => {
+    if (!grouped[w.cat]) grouped[w.cat] = [];
+    grouped[w.cat].push(w);
+  });
+
+  let html = '';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div style="font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 0 4px;border-bottom:1px solid rgba(30,45,61,0.5);margin-bottom:4px">${cat}</div>`;
+    items.forEach(w => {
+      const d = state.prices[w.sym];
+      const p = d ? d.price : null;
+      const c = d ? d.change : null;
+      const qty10be = p ? (p + FEE*2/10).toFixed(2) : '—';
+      const beM = p ? (FEE*2/10/p*100).toFixed(2) : '—';
+      const cl = c!=null?(c>=0?'up':'down'):'';
+      const sign = c!=null?(c>=0?'+':''):'';
+      html += `<div class="wl-row">
+        <div class="wl-left">
+          <div class="wl-sym" style="cursor:pointer" onclick="prefillCalc('${w.sym}',${p||0})">${w.sym}</div>
+          <div class="wl-name">${w.name}</div>
+          ${p?`<div class="wl-be">BE @10 Stk: €${qty10be} (+${beM}%)</div>`:''}
+        </div>
+        <div class="wl-right">
+          <div class="wl-price">${p?'€'+p.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span class="wl-loading">laden...</span>'}</div>
+          ${c!=null?`<div class="${cl}" style="font-size:11px">${sign}${c.toFixed(2)}%</div>`:''}
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('watchlist-body').innerHTML = html;
+}
+
+// ===== POSITIONS =====
+function renderPositions() {
+  const body = document.getElementById('pos-body');
+  if (state.positions.length === 0) {
+    body.innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:20px">Keine offenen Positionen. <span style="color:var(--cyan);cursor:pointer" onclick="showTab('calc')">Position hinzufügen →</span></td></tr>`;
+    updateStats();
+    return;
+  }
+  let totalUnreal = 0;
+  let html = '';
+  state.positions.forEach((pos, i) => {
+    const d = state.prices[pos.sym];
+    const curr = d ? d.price : pos.entry;
+    const gross = pos.dir==='LONG' ? (curr-pos.entry)*pos.qty : (pos.entry-curr)*pos.qty;
+    const net = gross - FEE*2;
+    const be = pos.dir==='LONG' ? pos.entry+(FEE*2/pos.qty) : pos.entry-(FEE*2/pos.qty);
+    const beM = (FEE*2/pos.qty/pos.entry*100).toFixed(3);
+    totalUnreal += net;
+    const gcl=gross>=0?'pos':'neg', ncl=net>=0?'pos':'neg';
+    const gs=gross>=0?'+':'', ns=net>=0?'+':'';
+    const beReached = pos.dir==='LONG'?curr>be:curr<be;
+    const beBadge = beReached?`<span class="beb ok">✓ BE</span>`:`<span class="beb no">✗ U.BE</span>`;
+    const stopHit = pos.dir==='LONG'?curr<=pos.sl:curr>=pos.sl;
+    const alertLevel = stopHit?'ah':(Math.abs(curr-pos.sl)/pos.sl < 0.01?'am':'al');
+    const alertTxt = stopHit?'STOP!':alertLevel==='am'?'NAHE SL':'OK';
+    const dc = pos.dir==='LONG'?'var(--green)':'var(--red)';
+    html += `<tr style="${stopHit?'background:rgba(255,59,92,0.04)':''}">
+      <td><span class="sym" style="cursor:pointer" onclick="prefillCalc('${pos.sym}',${curr})">${pos.sym}</span></td>
+      <td style="color:${dc};font-weight:700">${pos.dir}</td>
+      <td>${pos.qty}</td>
+      <td>€${pos.entry.toFixed(2)}</td>
+      <td style="${d?'':'color:var(--muted)'}">€${curr.toFixed(2)}</td>
+      <td class="fc">€${(FEE*2).toFixed(2)}</td>
+      <td class="pc ${gcl}">${gs}€${Math.abs(gross).toFixed(2)}</td>
+      <td class="pc ${ncl}" style="font-weight:700">${ns}€${Math.abs(net).toFixed(2)}</td>
+      <td>${beBadge}<span style="font-size:9px;color:var(--muted);margin-left:3px">€${be.toFixed(2)}</span></td>
+      <td style="color:var(--yellow)">€${pos.sl.toFixed(2)}</td>
+      <td><span class="abadge ${alertLevel}">${alertTxt}</span></td>
+      <td><button class="abt" onclick="closePosition(${i})">CLOSE</button></td>
+    </tr>`;
+  });
+  body.innerHTML = html;
+  updateStats(totalUnreal);
+}
+
+function updateStats(unrealPnL = 0) {
+  const closedPnL = state.history.reduce((a,t) => a + (t.gross - FEE*2), 0);
+  const totalFees = (state.history.length + state.positions.length) * FEE * 2;
+  document.getElementById('pnl-day').textContent = (closedPnL>=0?'+€ ':'-€ ') + Math.abs(closedPnL).toFixed(2);
+  document.getElementById('pnl-day').className = 'sv ' + (closedPnL>=0?'pos':'neg');
+  document.getElementById('open-pnl').textContent = (unrealPnL>=0?'+€ ':'-€ ') + Math.abs(unrealPnL).toFixed(2);
+  document.getElementById('open-pnl').className = 'sv ' + (unrealPnL>=0?'warn':'neg');
+  document.getElementById('open-pnl-net').textContent = `⚡ Netto bei Schließung: ${unrealPnL>=0?'+€ ':'-€ '}${Math.abs(unrealPnL).toFixed(2)}`;
+  document.getElementById('kapital-val').textContent = '€ ' + (state.depot||0).toLocaleString('de-DE',{minimumFractionDigits:2});
+  document.getElementById('fees-total').textContent = '€ ' + totalFees.toFixed(2);
+  document.getElementById('fees-sub').textContent = `${(state.history.length+state.positions.length)*2} Orders · ${state.history.length+state.positions.length} Roundtrips`;
+  document.getElementById('f-fees').textContent = '€' + totalFees.toFixed(0);
+  document.getElementById('f-orders').textContent = (state.history.length+state.positions.length)*2;
+  document.getElementById('f-pnl').textContent = (closedPnL>=0?'+€':'-€') + Math.abs(closedPnL).toFixed(0);
+  document.getElementById('f-pnl').style.color = closedPnL>=0?'var(--green)':'var(--red)';
+  const risk = state.depot > 0 ? Math.min(100, state.positions.length * 300 / state.depot * 100) : 0;
+  document.getElementById('risk-pct').textContent = risk.toFixed(0)+'%';
+  document.getElementById('risk-bar').style.width = risk+'%';
+  const fPct = closedPnL !== 0 ? Math.abs(totalFees/closedPnL*100) : 0;
+  document.getElementById('fees-verdict').textContent = `⚡ ${fPct.toFixed(1)}% des P&L — ${fPct<5?'gut':fPct<15?'akzeptabel':'zu hoch!'}`;
+}
+
+// ===== CLOSE POSITION =====
+function closePosition(i) {
+  const pos = state.positions[i];
+  const d = state.prices[pos.sym];
+  const curr = d ? d.price : pos.entry;
+  const gross = pos.dir==='LONG' ? (curr-pos.entry)*pos.qty : (pos.entry-curr)*pos.qty;
+  const net = gross - FEE*2;
+  const sign = net>=0?'+':'';
+  if(confirm(`${pos.sym} schließen?\n\nBrutto P&L: ${sign}€${gross.toFixed(2)}\nTR-Gebühren: −€2,00\nNetto P&L: ${sign}€${net.toFixed(2)}`)) {
+    state.history.unshift({
+      time: new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),
+      date: new Date().toLocaleDateString('de-DE'),
+      sym: pos.sym, dir: pos.dir, qty: pos.qty,
+      entry: pos.entry, exit: curr, gross, fees: FEE*2
+    });
+    state.positions.splice(i, 1);
+    save();
+    renderPositions();
+    renderHistory();
+    updateAITips();
+  }
+}
+
+// ===== ADD POSITION =====
+function addPositionFromCalc(side) {
+  const sym = document.getElementById('c-sym').value.trim().toUpperCase() || 'UNBEKANNT';
+  const qty = parseInt(document.getElementById('c-qty').value) || 1;
+  const buy = parseFloat(document.getElementById('c-buy').value) || 0;
+  const stop = parseFloat(document.getElementById('c-stop').value) || (buy*0.98);
+  const dir = side==='BUY' ? 'LONG' : 'SHORT';
+  if (buy <= 0) { alert('Bitte gültigen Kaufkurs eingeben.'); return; }
+  const posSize = buy * qty;
+  if (posSize < 100) {
+    if (!confirm(`Position nur €${posSize.toFixed(0)} — sehr klein! Gebühr = ${(FEE*2/posSize*100).toFixed(1)}% des Einsatzes.\nTrotzdem eröffnen?`)) return;
+  }
+  state.positions.push({ sym, dir, qty, entry: buy, sl: stop, added: new Date().toISOString() });
+  if (!state.prices[sym]) state.prices[sym] = { price: buy, change: 0 };
+  save();
+  document.getElementById('c-feedback').innerHTML = `<span style="color:var(--green)">✓ ${dir} ${qty}× ${sym} @ €${buy.toFixed(2)} — Position eröffnet</span>`;
+  setTimeout(() => document.getElementById('c-feedback').textContent='', 4000);
+  showCockpit();
+  renderPositions();
+  updateAITips();
+  showTab('cockpit');
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  const body = document.getElementById('hist-body');
+  if (state.history.length === 0) {
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">Noch keine Trades geschlossen.</td></tr>';
+    document.getElementById('hist-summary').innerHTML = '<span style="color:var(--muted)">Noch keine geschlossenen Trades.</span>';
+    return;
+  }
+  let totalGross=0, totalFees=0;
+  body.innerHTML = state.history.map(t => {
+    const net = t.gross - t.fees;
+    totalGross += t.gross; totalFees += t.fees;
+    const cl=net>=0?'pos':'neg', sign=net>=0?'+':'';
+    const gs=t.gross>=0?'+':'';
+    return `<tr>
+      <td style="color:var(--muted)">${t.date||''} ${t.time}</td>
+      <td><span class="sym">${t.sym}</span></td>
+      <td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'};font-weight:700">${t.dir}</td>
+      <td>${t.qty}</td>
+      <td>€${t.entry.toFixed(2)}</td>
+      <td>€${t.exit.toFixed(2)}</td>
+      <td class="pc ${t.gross>=0?'pos':'neg'}">${gs}€${Math.abs(t.gross).toFixed(2)}</td>
+      <td class="fc">−€${t.fees.toFixed(2)}</td>
+      <td class="pc ${cl}" style="font-weight:700">${sign}€${Math.abs(net).toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+  const totalNet = totalGross - totalFees;
+  const ns=totalNet>=0?'+':'';
+  document.getElementById('hist-summary').innerHTML = `
+    <span style="color:var(--muted)">Gesamt: ${state.history.length} Trades</span>
+    <span>Brutto: <strong>${totalGross>=0?'+':''} €${totalGross.toFixed(2)}</strong></span>
+    <span>TR-Gebühren: <strong style="color:var(--orange)">−€${totalFees.toFixed(2)}</strong></span>
+    <span>Netto: <strong style="color:${totalNet>=0?'var(--green)':'var(--red)'}">${ns}€${totalNet.toFixed(2)}</strong></span>`;
+}
+renderHistory();
+
+// ===== TRADE CALCULATOR =====
+function calcTrade() {
+  const buy = parseFloat(document.getElementById('c-buy').value)||0;
+  const qty = parseFloat(document.getElementById('c-qty').value)||1;
+  const target = parseFloat(document.getElementById('c-target').value)||0;
+  const stop = parseFloat(document.getElementById('c-stop').value)||0;
+  const dir = document.getElementById('c-dir').value;
+  if (buy<=0||qty<=0) return;
+  const posSize = buy*qty;
+  const be = dir==='LONG' ? buy+(FEE*2/qty) : buy-(FEE*2/qty);
+  const beMove = (FEE*2/qty/buy*100);
+  const tPnL = dir==='LONG' ? (target-buy)*qty-FEE*2 : (buy-target)*qty-FEE*2;
+  const sPnL = dir==='LONG' ? (stop-buy)*qty-FEE*2 : (buy-stop)*qty-FEE*2;
+  const rr = (tPnL>0&&sPnL<0) ? Math.abs(tPnL/sPnL) : 0;
+  const fPct = (FEE*2/posSize*100);
+  const sizeOk = posSize>=200&&posSize<=600;
+  document.getElementById('r-size').textContent = '€ '+posSize.toLocaleString('de-DE',{minimumFractionDigits:2});
+  document.getElementById('r-be').textContent = '€ '+be.toFixed(3);
+  document.getElementById('r-be-pct').textContent = '+'+beMove.toFixed(3)+'%';
+  const tEl=document.getElementById('r-tpnl'); tEl.textContent=(tPnL>=0?'+':'')+' €'+Math.abs(tPnL).toFixed(2); tEl.className=tPnL>=0?'good':'bad';
+  const sEl=document.getElementById('r-spnl'); sEl.textContent=(sPnL>=0?'+':'')+' €'+Math.abs(sPnL).toFixed(2); sEl.className=sPnL>=0?'good':'bad';
+  const rrEl=document.getElementById('r-rr'); rrEl.textContent='1 : '+rr.toFixed(2); rrEl.style.color=rr>=2?'var(--green)':rr>=1?'var(--yellow)':'var(--red)';
+  document.getElementById('r-fpct').textContent = fPct.toFixed(2)+'%';
+  document.getElementById('r-size-ok').innerHTML = sizeOk?'<span style="color:var(--green)">✓ Gut (€200–€600)</span>':posSize<200?'<span style="color:var(--red)">✗ Zu klein!</span>':'<span style="color:var(--yellow)">⚠ Groß</span>';
+  const v=document.getElementById('r-verdict');
+  if(posSize<200){v.style.cssText='padding:8px;border-radius:5px;font-size:11px;text-align:center;font-weight:700;background:rgba(255,59,92,0.1);color:var(--red);border:1px solid rgba(255,59,92,0.2)';v.textContent='⛔ Zu klein! Gebühr = '+fPct.toFixed(1)+'% — nicht effizient';}
+  else if(rr>=2&&tPnL>2){v.style.cssText='padding:8px;border-radius:5px;font-size:11px;text-align:center;font-weight:700;background:rgba(0,255,157,0.08);color:var(--green);border:1px solid rgba(0,255,157,0.2)';v.textContent='✅ Gutes Setup! R/R ≥ 2 · Gebühren gut gedeckt';}
+  else if(tPnL>2&&rr>=1){v.style.cssText='padding:8px;border-radius:5px;font-size:11px;text-align:center;font-weight:700;background:rgba(245,196,0,0.08);color:var(--yellow);border:1px solid rgba(245,196,0,0.2)';v.textContent='⚠️ Akzeptabel · R/R verbessern?';}
+  else{v.style.cssText='padding:8px;border-radius:5px;font-size:11px;text-align:center;font-weight:700;background:rgba(255,59,92,0.08);color:var(--red);border:1px solid rgba(255,59,92,0.2)';v.textContent='❌ Lohnt sich nicht — Ziel deckt €2 Gebühr nicht!';}
+}
+calcTrade();
+
+async function fetchCalcPrice() {
+  const sym = document.getElementById('c-sym').value.trim().toUpperCase();
+  if (!sym) return;
+  const el = document.getElementById('c-live-price');
+  el.innerHTML = '<span class="ld"></span> Lade...';
+  const d = await fetchPrice(sym);
+  if (d) {
+    document.getElementById('c-buy').value = d.price.toFixed(2);
+    el.innerHTML = `<span style="color:var(--cyan)">Live: €${d.price.toFixed(2)}</span> <span class="${d.change>=0?'up':'down'}">${d.change>=0?'+':''}${d.change.toFixed(2)}%</span>`;
+    calcTrade();
+  } else {
+    el.innerHTML = '<span style="color:var(--red)">Kurs nicht gefunden</span>';
+  }
+}
+
+function prefillCalc(sym, price) {
+  showTab('calc');
+  document.getElementById('c-sym').value = sym;
+  if (price>0) document.getElementById('c-buy').value = price.toFixed(2);
+  calcTrade();
+  document.getElementById('c-live-price').innerHTML = price>0 ? `<span style="color:var(--cyan)">Kurs: €${price.toFixed(2)}</span>` : '';
+}
+
+// ===== TRADE SCANNER (AI-powered) =====
+async function runScanner() {
+  const out = document.getElementById('scanner-output');
+  out.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)"><span class="ld"></span> KI analysiert Märkte... (DAX, US-Tech, ETFs)</div>`;
+
+  const priceData = WATCHLIST.map(w => {
+    const d = state.prices[w.sym];
+    return `${w.sym} (${w.name}): ${d?'€'+d.price.toFixed(2)+', '+d.change.toFixed(2)+'%':'kein Kurs'}`;
+  }).join('\n');
+
+  const depot = state.depot || 1000;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Du bist ein Day-Trading-Analyst für einen Privatanleger bei Trade Republic (Deutschland).
+KRITISCHE KOSTEN-REGEL: Jede Order kostet €1. Kauf + Verkauf = €2 pro Roundtrip.
+- Budget pro Trade: €200–500
+- Bei €300 Position: Breakeven = +0,67% Kursbewegung nötig
+- Empfehlung: nur Trades mit R/R ≥ 1:2
+- Nur Setups mit KLAREN Entry/Target/Stop
+
+Antworte NUR mit einem JSON-Array (keine Erklärung, kein Markdown). Format:
+[
+  {
+    "sym": "SAP.DE",
+    "name": "SAP SE",
+    "direction": "LONG",
+    "currentPrice": 185.32,
+    "entry": 185.00,
+    "target": 188.50,
+    "stop": 183.00,
+    "qty": 10,
+    "reason": "Kurze Begründung auf Deutsch (max 2 Sätze)",
+    "signal": "buy",
+    "confidence": "hoch"
+  }
+]
+Erstelle genau 6 Setups (Mix aus DAX, US-Tech, ETF). Berechne qty so dass Positionsgröße €200–500 ist.`,
+        messages: [{role:'user', content:`Aktuelle Kurse:\n${priceData}\n\nErstelle 6 konkrete Trade-Setups für heute. Depot: €${depot}`}]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '[]';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const setups = JSON.parse(clean);
+    renderScannerResults(setups);
+  } catch(e) {
+    out.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted)">
+      <div style="font-size:20px;margin-bottom:8px">⚠️</div>
+      <div>Fehler beim Scanner. Kurse zuerst aktualisieren und erneut versuchen.</div>
+      <div style="font-size:10px;margin-top:4px;color:var(--red)">${e.message}</div>
+    </div>`;
+  }
+}
+
+function renderScannerResults(setups) {
+  const out = document.getElementById('scanner-output');
+  if (!setups || setups.length === 0) { out.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Keine Setups gefunden.</div>'; return; }
+  const cards = setups.map(s => {
+    const posSize = s.entry * s.qty;
+    const be = s.direction==='LONG' ? s.entry+(FEE*2/s.qty) : s.entry-(FEE*2/s.qty);
+    const tPnL = s.direction==='LONG' ? (s.target-s.entry)*s.qty-FEE*2 : (s.entry-s.target)*s.qty-FEE*2;
+    const sPnL = Math.abs((s.direction==='LONG'?(s.stop-s.entry):(s.entry-s.stop))*s.qty) + FEE*2;
+    const rr = sPnL>0 ? (tPnL/sPnL) : 0;
+    const rrCl = rr>=2?'rr-good':rr>=1?'rr-ok':'rr-bad';
+    const sigCl = s.signal==='buy'?'buy-signal':s.signal==='sell'?'sell-signal':'watch-signal';
+    const sigBadge = s.signal==='buy'?'buy-badge':s.signal==='sell'?'sell-badge':'watch-badge';
+    const sigTxt = s.signal==='buy'?'▲ LONG':s.signal==='sell'?'▼ SHORT':'👁 WATCH';
+    const confColor = s.confidence==='hoch'?'var(--green)':s.confidence==='mittel'?'var(--yellow)':'var(--muted)';
+    const priceColor = s.signal==='buy' ? 'var(--green)' : s.signal==='sell' ? 'var(--red)' : 'var(--text)';
+    return `<div class="signal-card ${sigCl}" onclick="prefillCalc('${s.sym}',${s.currentPrice||s.entry})">
+      <div class="sc-head">
+        <div>
+          <div class="sc-sym">${s.sym}</div>
+          <div class="sc-name">${s.name||''}</div>
+        </div>
+        <div>
+          <span class="sc-badge ${sigBadge}">${sigTxt}</span>
+          <div style="font-size:9px;color:${confColor};text-align:right;margin-top:3px">Konfidenz: ${s.confidence||'-'}</div>
+        </div>
+      </div>
+      <div class="sc-price" style="color:${priceColor}">€${(s.currentPrice||s.entry).toFixed(2)}</div>
+      <div style="margin:2px 0"><span class="sc-rr ${rrCl}">R/R 1 : ${rr.toFixed(2)}</span></div>
+      <div class="sc-reason">${s.reason}</div>
+      <div class="sc-levels">
+        <div class="sc-lvl"><div class="sc-lvl-l">Entry</div><div class="sc-lvl-v" style="color:var(--cyan)">€${s.entry.toFixed(2)}</div></div>
+        <div class="sc-lvl"><div class="sc-lvl-l">Ziel</div><div class="sc-lvl-v" style="color:var(--green)">€${s.target.toFixed(2)}</div></div>
+        <div class="sc-lvl"><div class="sc-lvl-l">Stop</div><div class="sc-lvl-v" style="color:var(--red)">€${s.stop.toFixed(2)}</div></div>
+      </div>
+      <div class="sc-fee">
+        📊 ${s.qty} Stk · Pos: €${posSize.toFixed(0)} · BE: €${be.toFixed(2)} · Netto-Ziel: +€${tPnL.toFixed(2)}
+      </div>
+      <button class="sc-add-btn" onclick="event.stopPropagation();prefillCalc('${s.sym}',${s.entry});document.getElementById('c-qty').value=${s.qty};document.getElementById('c-target').value=${s.target};document.getElementById('c-stop').value=${s.stop};calcTrade()">
+        → In Kalkulator übernehmen
+      </button>
+    </div>`;
+  });
+  out.innerHTML = `<div class="scanner-grid">${cards.join('')}</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:10px;padding:8px;border:1px solid var(--border);border-radius:5px">
+      ⚠️ <strong>Risikohinweis:</strong> Diese Setups sind KI-generierte Ideen, keine Anlageberatung. Day Trading ist hochriskant — die Mehrheit der Privatanleger verliert Geld. Setze nur Kapital ein, dessen Verlust du dir leisten kannst.
+    </div>`;
+}
+
+// ===== AI TIPS =====
+function updateAITips() {
+  const tips = [];
+  if (state.positions.length === 0) {
+    tips.push({type:'info', text:'Noch keine Positionen offen. Nutze den <strong style="color:var(--cyan)">Trade Scanner</strong> für Setups oder eröffne manuell eine Position im Kalkulator.'});
+  } else {
+    state.positions.forEach(p => {
+      const d = state.prices[p.sym];
+      const curr = d ? d.price : p.entry;
+      const net = p.dir==='LONG' ? (curr-p.entry)*p.qty - FEE*2 : (p.entry-curr)*p.qty - FEE*2;
+      const be = p.dir==='LONG' ? p.entry+(FEE*2/p.qty) : p.entry-(FEE*2/p.qty);
+      const beReached = p.dir==='LONG' ? curr>be : curr<be;
+      if (!beReached) tips.push({type:'warn', text:`<strong style="color:var(--orange)">${p.sym}</strong> hat Breakeven (€${be.toFixed(2)}) noch nicht erreicht. Noch kein Netto-Gewinn möglich!`});
+      if (p.dir==='LONG' && curr <= p.sl*1.005) tips.push({type:'sell', text:`<strong style="color:var(--red)">${p.sym}</strong> nahe Stop Loss €${p.sl.toFixed(2)}! Aktuell €${curr.toFixed(2)}. Schließen?`});
+      if (net > 10) tips.push({type:'buy', text:`<strong style="color:var(--green)">${p.sym}</strong> im Gewinn: +€${net.toFixed(2)} netto. Trailing Stop erwägen.`});
+    });
+  }
+  if (tips.length === 0) tips.push({type:'fee', text:'Alle Positionen über Breakeven. Trailing Stops setzen um Gewinne zu sichern.'});
+  document.getElementById('ai-tips').innerHTML = tips.slice(0,4).map(t =>
+    `<div class="ai-tip ${t.type}" data-type="${t.type.toUpperCase()}">${t.text}</div>`
+  ).join('');
+}
+
+async function askAI() {
+  const q = document.getElementById('ai-q').value.trim();
+  if (!q) return;
+  const el = document.getElementById('ai-resp');
+  el.className='ai-resp show';
+  el.innerHTML='<span class="ld"></span> Analysiere...';
+  const posStr = state.positions.map(p=>`${p.sym} ${p.dir} ${p.qty}x @€${p.entry}`).join(', ')||'keine';
+  const priceInfo = state.positions.map(p=>{const d=state.prices[p.sym];return d?`${p.sym} aktuell €${d.price.toFixed(2)}`:'';}).filter(Boolean).join(', ');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:400,
+        system:`Day-Trading-Assistent für Trade Republic (Deutschland).
+Ordergebühr: €1 pro Order. Roundtrip (Kauf+Verkauf) = €2.
+Budget pro Trade: €200–500.
+Breakeven-Formel: Entry + (€2 / Stückzahl).
+Empfehle nur Trades mit R/R ≥ 1:2.
+Aktuelle Positionen: ${posStr}.
+Aktuelle Kurse: ${priceInfo}.
+Antworte auf Deutsch, max 4 Sätze, konkret mit Kurs-Angaben und Netto-P&L nach Gebühren.`,
+        messages:[{role:'user',content:q}]
+      })
+    });
+    const data=await res.json();
+    el.textContent=data.content?.[0]?.text||'Keine Antwort.';
+  } catch(e) { el.textContent='⚠️ Verbindungsfehler.'; }
+}
+
+// ===== DEPOT SETUP =====
+function setDepot() {
+  const val = parseFloat(document.getElementById('depot-input').value) || 0;
+  if (val < 100) { alert('Bitte mindestens €100 eingeben.'); return; }
+  state.depot = val;
+  save();
+  showCockpit();
+}
+
+function showCockpit() {
+  document.getElementById('setup-prompt').style.display = state.depot>0 ? 'none' : 'block';
+  document.getElementById('main-cockpit').style.display = state.depot>0 ? 'block' : 'none';
+}
+
+// ===== TABS =====
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>{ if(t.getAttribute('onclick')===`showTab('${name}')`) t.classList.add('active'); });
+}
+
+// ===== INIT =====
+showCockpit();
+renderPositions();
+renderHistory();
+updateAITips();
+
+// Initial price fetch
+refreshAllPrices();
+// Auto-refresh every 60 seconds
+setInterval(refreshAllPrices, 60000);
+</script>
+</body>
+</html>
